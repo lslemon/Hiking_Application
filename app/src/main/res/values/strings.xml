@@ -3,4 +3,6 @@
     <string name="tab_text_1">Tab 1</string>
     <string name="tab_text_2">Tab 2</string>
     <string name="title_activity_maps">Map</string>
+    <string name="carto_licence_key">XTUM0Q0ZRQ3JSdXh4eTE0RkxkYm1XNEtlVmJVU01kSTY0QUlWQUtyTE55dXdHVTZyRE9hZzI0S3lYSzV1OEgvSwoKYXBwVG9rZW49YzJmZTdiZTgtNzQ3MC00NjFmLWJmNmYtZjZjMTFkMjM4YmViCnBhY2thZ2VOYW1lPWNvbS5leGFtcGxlLmhpa2luZ19hcHBsaWNhdGlvbgpvbmxpbmVMaWNlbnNlPTEKcHJvZHVjdHM9c2RrLWFuZHJvaWQtNC4qCndhdGVybWFyaz1jYXJ0b2RiCg==</string>
+    <string name="open_street_map_tile_url">http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png</string>
 </resources>
