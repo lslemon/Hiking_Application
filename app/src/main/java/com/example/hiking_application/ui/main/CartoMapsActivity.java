@@ -31,7 +31,7 @@ public class CartoMapsActivity extends Activity
         setContentView(R.layout.activity_carto_maps);
         ButterKnife.bind(this);
         MapView.registerLicense(getString(R.string.carto_licence_key), this);
-
+        
         /*// Add basemap layer to mapView
         CartoOnlineVectorTileLayer baseLayer = new CartoOnlineVectorTileLayer(CartoBaseMapStyle.CARTO_BASEMAP_STYLE_VOYAGER);
         mapView.getLayers().add(baseLayer);
