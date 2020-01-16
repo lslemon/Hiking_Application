@@ -4,15 +4,30 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONArrayRequestListener;
+import com.carto.core.MapPos;
 import com.carto.datasources.HTTPTileDataSource;
 import com.carto.datasources.TileDataSource;
 import com.carto.layers.CartoBaseMapStyle;
 import com.carto.layers.CartoOnlineVectorTileLayer;
 import com.carto.layers.RasterTileLayer;
+import com.carto.projections.Projection;
 import com.carto.ui.MapClickInfo;
 import com.carto.ui.MapEventListener;
 import com.carto.ui.MapView;
 import com.example.hiking_application.R;
+import com.mapquest.android.commoncore.network.volley.ResponseAndErrorListener;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -30,18 +45,20 @@ public class CartoMapsActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_carto_maps);
         ButterKnife.bind(this);
+        AndroidNetworking.initialize(getApplicationContext());
         MapView.registerLicense(getString(R.string.carto_licence_key), this);
         
-        /*// Add basemap layer to mapView
-        CartoOnlineVectorTileLayer baseLayer = new CartoOnlineVectorTileLayer(CartoBaseMapStyle.CARTO_BASEMAP_STYLE_VOYAGER);
-        mapView.getLayers().add(baseLayer);
-        */
+        // Add basemap layer to mapView
+        /*CartoOnlineVectorTileLayer baseLayer = new CartoOnlineVectorTileLayer(CartoBaseMapStyle.CARTO_BASEMAP_STYLE_VOYAGER);
+        mapView.getLayers().add(baseLayer);*/
 
         // Add basemap layer to mapView
         TileDataSource tileDataSource = new HTTPTileDataSource(1,19,getString(R.string.open_street_map_tile_url));
         RasterTileLayer baseLayer = new RasterTileLayer(tileDataSource);
+        Projection projection = mapView.getOptions().getBaseProjection();
         mapView.getLayers().add(baseLayer);
         mapView.setMapEventListener(new HikingMapEvenListener());
+        mapView.zoom(10f, projection.fromLatLong(53.513853, -9.676749), 1);
     }
 
     private class HikingMapEvenListener extends MapEventListener
@@ -49,7 +66,45 @@ public class CartoMapsActivity extends Activity
         @Override
         public void onMapClicked(MapClickInfo mapClickInfo) {
             super.onMapClicked(mapClickInfo);
-            Log.i(TAG, "onMapClicked: "+mapClickInfo.getClickPos().getZ());
+            Projection projection = mapView.getOptions().getBaseProjection();
+            MapPos pos = projection.toLatLong(mapClickInfo.getClickPos().getX(), mapClickInfo.getClickPos().getY());
+            RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+            /*AndroidNetworking.get(getString(R.string.open_elevation_API))
+                    .addPathParameter( "locations", pos.getX()+","+pos.getY())
+                    .build()
+                    .getAsJSONArray(new JSONArrayRequestListener() {
+                        @Override
+                        public void onResponse(JSONArray response) {
+                            try {
+                                Log.i(TAG, "FUCK"+response.get(0));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onError(ANError anError)
+                        {
+                            Log.i(TAG, "onError: "+ anError.getErrorBody());
+                        }
+                    });*/
+
+
+            JsonObjectRequest fireRequest = new JsonObjectRequest(getString(R.string.open_elevation_API), null, new Response.Listener<JSONObject>() {
+            
+
+                @Override
+                public void onResponse(JSONObject response) {
+                    Log.i(TAG, "onResponse: ");
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.i(TAG, "onErrorResponse: ");
+                }
+            });
+                    Log.i(TAG, "onMapClicked: x " + pos.getX());
+            Log.i(TAG, "onMapClicked: y "+pos.getY());
         }
     }
 }
