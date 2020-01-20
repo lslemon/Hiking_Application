@@ -4,30 +4,29 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.JSONArrayRequestListener;
 import com.carto.core.MapPos;
 import com.carto.datasources.HTTPTileDataSource;
 import com.carto.datasources.TileDataSource;
-import com.carto.layers.CartoBaseMapStyle;
-import com.carto.layers.CartoOnlineVectorTileLayer;
 import com.carto.layers.RasterTileLayer;
 import com.carto.projections.Projection;
 import com.carto.ui.MapClickInfo;
 import com.carto.ui.MapEventListener;
 import com.carto.ui.MapView;
 import com.example.hiking_application.R;
-import com.mapquest.android.commoncore.network.volley.ResponseAndErrorListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,7 +46,12 @@ public class CartoMapsActivity extends Activity
         ButterKnife.bind(this);
         AndroidNetworking.initialize(getApplicationContext());
         MapView.registerLicense(getString(R.string.carto_licence_key), this);
-        
+
+        /*// Add basemap layer to mapView
+        CartoOnlineVectorTileLayer baseLayer = new CartoOnlineVectorTileLayer(CartoBaseMapStyle.CARTO_BASEMAP_STYLE_VOYAGER);
+        mapView.getLayers().add(baseLayer);
+        */
+
         // Add basemap layer to mapView
         /*CartoOnlineVectorTileLayer baseLayer = new CartoOnlineVectorTileLayer(CartoBaseMapStyle.CARTO_BASEMAP_STYLE_VOYAGER);
         mapView.getLayers().add(baseLayer);*/
@@ -90,8 +94,23 @@ public class CartoMapsActivity extends Activity
                     });*/
 
 
-            JsonObjectRequest fireRequest = new JsonObjectRequest(getString(R.string.open_elevation_API), null, new Response.Listener<JSONObject>() {
-            
+            Map<String, Double> location = new HashMap<>();
+            location.put("latitude", pos.getX());
+            location.put("longitude", pos.getY());
+            JSONObject locationObject = new JSONObject(location);
+            JSONArray locations = new JSONArray();
+            locations.put(locationObject);
+            locations.put(locationObject);
+
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("locations", locations);
+            }
+            catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            JsonObjectRequest fireRequest = new JsonObjectRequest(Request.Method.POST, getString(R.string.open_elevation_API), jsonObject, new Response.Listener<JSONObject>() {
 
                 @Override
                 public void onResponse(JSONObject response) {
@@ -100,11 +119,19 @@ public class CartoMapsActivity extends Activity
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.i(TAG, "onErrorResponse: ");
+                    Log.i(TAG, "onErrorResponse: "+error.networkResponse+ " "+ error.getMessage());
                 }
             });
-                    Log.i(TAG, "onMapClicked: x " + pos.getX());
-            Log.i(TAG, "onMapClicked: y "+pos.getY());
+
+            /*try {
+                Log.i(TAG, "onMapClicked: "+jsonObject.toString(4));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }*/
+
+            Log.i(TAG, "onMapClicked: "+fireRequest.toString());
+
+            requestQueue.add(fireRequest);
         }
     }
 }
